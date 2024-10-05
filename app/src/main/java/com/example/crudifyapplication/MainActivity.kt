@@ -20,10 +20,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // "Check Now" button
         val checkNowButton: Button = findViewById(R.id.checkNowButton)
-
-        // Set click listener for the button
         checkNowButton.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
