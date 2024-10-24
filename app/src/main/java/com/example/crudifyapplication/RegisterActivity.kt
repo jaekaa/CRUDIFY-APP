@@ -2,9 +2,13 @@ package com.example.crudifyapplication
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
 
 class RegisterActivity : AppCompatActivity() {
@@ -18,16 +22,33 @@ class RegisterActivity : AppCompatActivity() {
         val registerButton: Button = findViewById(R.id.registerButton)
         val loginLink: TextView = findViewById(R.id.loginLink)
 
+        val fullText = "Already have an account? Login"
+        val spannableString = SpannableString(fullText)
+        val purpleColor = ContextCompat.getColor(this, R.color.dark_purple)
+        val startIndex = fullText.indexOf("Login")
+        spannableString.setSpan(
+            ForegroundColorSpan(purpleColor),
+            startIndex,
+            fullText.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        loginLink.text = spannableString
+
         registerButton.setOnClickListener {
-            val intent = Intent(this, HomepageActivity::class.java)
-            startActivity(intent)
-            finish() // This prevents the user from coming back to the register screen with the back button
+            val username = usernameInput.text.toString()
+            val email = emailInput.text.toString()
+            val password = passwordInput.text.toString()
+
+            if (username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
+                val intent = Intent(this, HomepageActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
         }
 
         loginLink.setOnClickListener {
-            val intent = Intent(this, SignupActivity::class.java)
+            val intent = Intent(this, SigninActivity::class.java)
             startActivity(intent)
-            // We don't call finish() here so the user can come back to register if needed
         }
     }
 }
