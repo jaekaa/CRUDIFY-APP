@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature android:name="android.hardware.camera" android:required="true"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,32 +15,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CRUDIFYApplication"
-        tools:targetApi="31">
+    tools:targetApi="31">
 
-        <!--MainActivity-->
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+    <activity
+        android:name=".MainActivity"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
+        </intent-filter>
+    </activity>
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+    <activity android:name=".ScannedBarcodeActivity" android:exported="false"/>
+    <activity android:name=".TransactionDetailsActivity" android:exported="false">
+        <meta-data android:name="android.app.lib_name" android:value=""/>
+    </activity>
+    <activity android:name=".ProductListActivity" android:exported="false"/>
+    <activity android:name=".CreateTableActivity" android:exported="false"/>
+    <activity android:name=".RegisterActivity" android:exported="true"/>
+    <activity android:name=".SigninActivity" android:exported="true"/>
+    <activity android:name=".ForgotpassActivity" android:exported="true"/>
+    <activity android:name=".HomepageActivity" android:exported="true"/>
 
-        <!--Register-->
-        <activity
-            android:name=".RegisterActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+</application>
 
-        <activity android:name=".SigninActivity" />
-        <activity android:name=".ForgotpassActivity" />
-        <activity android:name=".HomepageActivity" />
-    </application>
-
-</manifest>
+    </manifest>

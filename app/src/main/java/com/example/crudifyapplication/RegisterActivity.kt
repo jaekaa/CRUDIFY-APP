@@ -22,6 +22,7 @@ class RegisterActivity : AppCompatActivity() {
         val registerButton: Button = findViewById(R.id.registerButton)
         val loginLink: TextView = findViewById(R.id.loginLink)
 
+        // Set up the "Already have an account? Login" link with colored text
         val fullText = "Already have an account? Login"
         val spannableString = SpannableString(fullText)
         val purpleColor = ContextCompat.getColor(this, R.color.dark_purple)
@@ -34,18 +35,22 @@ class RegisterActivity : AppCompatActivity() {
         )
         loginLink.text = spannableString
 
+        // Handle the register button click
         registerButton.setOnClickListener {
             val username = usernameInput.text.toString()
             val email = emailInput.text.toString()
             val password = passwordInput.text.toString()
 
             if (username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
+                // Pass username to HomepageActivity instead of MainActivity
                 val intent = Intent(this, HomepageActivity::class.java)
+                intent.putExtra("USERNAME", username) // Sending username to HomepageActivity
                 startActivity(intent)
-                finish()
+                finish() // Close RegisterActivity
             }
         }
 
+        // Handle the login link click
         loginLink.setOnClickListener {
             val intent = Intent(this, SigninActivity::class.java)
             startActivity(intent)
