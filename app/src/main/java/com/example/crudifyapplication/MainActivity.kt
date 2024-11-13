@@ -1,9 +1,8 @@
-package com.example.scanner
+package com.example.crudifyapplication
 
 import android.content.Intent
 import android.database.Cursor
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -16,87 +15,70 @@ import com.example.crudifyapplication.ScannedBarcodeActivity
 import com.example.crudifyapplication.TransactionDetailsActivity
 
 class MainActivity : AppCompatActivity() {
-    var btnScanBarcode: Button? = null
-    var btnShowData: Button? = null
-    var saveButton: Button? = null
-    var resultText: TextView? = null
-    var scannedBarcodes: ArrayList<String?>? = null
-    var dbHelper: DatabaseHelper? = null
+
+    // Making these non-nullable with lateinit
+    private lateinit var btnScanBarcode: Button
+    private lateinit var btnShowData: Button
+    private lateinit var saveButton: Button
+    private lateinit var resultText: TextView
+    private lateinit var dbHelper: DatabaseHelper
+
+    private val scannedBarcodes = ArrayList<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main) // Make sure you're using the correct layout file
+        setContentView(R.layout.activity_main_barcode) // Make sure you're using the correct layout file
 
         // Initialize UI components
-        btnScanBarcode = findViewById<Button>(R.id.btnScanBarcode)
-        resultText = findViewById<TextView>(R.id.result_text)
-        btnShowData = findViewById<Button>(R.id.btnShowData)
-        saveButton = findViewById<Button>(R.id.goToProductListButton) // The save button
+        btnScanBarcode = findViewById(R.id.btnScanBarcode)
+        resultText = findViewById(R.id.result_text)
+        btnShowData = findViewById(R.id.btnShowData)
+        saveButton = findViewById(R.id.goToProductListButton)
 
-        scannedBarcodes = ArrayList()
         dbHelper = DatabaseHelper(this) // Initialize your database helper
 
-        // Set an OnClickListener on the scan barcode button
-        btnScanBarcode.setOnClickListener(View.OnClickListener {
-            val intent = Intent(
-                this@MainActivity,
-                ScannedBarcodeActivity::class.java
-            )
+        // Set OnClickListeners with lambdas
+        btnScanBarcode.setOnClickListener {
+            val intent = Intent(this, ScannedBarcodeActivity::class.java)
             scanBarcodeLauncher.launch(intent)
-        })
+        }
 
-        // Set an OnClickListener on the show data button
-        btnShowData.setOnClickListener(View.OnClickListener {
+        btnShowData.setOnClickListener {
             displayAllData()
-            val intent = Intent(
-                this@MainActivity,
-                TransactionDetailsActivity::class.java
-            )
+            val intent = Intent(this, TransactionDetailsActivity::class.java)
             startActivity(intent)
-        })
+        }
 
-        // Set an OnClickListener on the save button
-        saveButton.setOnClickListener(View.OnClickListener { // Assuming you have logic to get the scanned product details
+        saveButton.setOnClickListener {
             val scannedProductName = "Sample Product" // Replace with actual scanned product name
             val scannedQuantity = 1 // Replace with actual scanned quantity
 
             // Call method to update product quantity
-            val isUpdated: Boolean =
-                dbHelper.insertOrUpdateProduct(scannedProductName, scannedQuantity)
+            val isUpdated = dbHelper.insertOrUpdateProduct(scannedProductName, scannedQuantity)
             // Notify the user about the success or failure of the update
-            if (isUpdated) {
-                Toast.makeText(this@MainActivity, "Product list updated!", Toast.LENGTH_SHORT)
-                    .show()
-            } else {
-                Toast.makeText(
-                    this@MainActivity,
-                    "Update failed. Please try again!",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        })
+            Toast.makeText(this, if (isUpdated) "Product list updated!" else "Update failed. Please try again!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // Barcode scanner result handling
-    private val scanBarcodeLauncher = registerForActivityResult<Intent, ActivityResult>(
+    private val scanBarcodeLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
-            if (data != null && data.hasExtra("intentData")) {
-                val intentData = data.getStringExtra("intentData")
+            val intentData = data?.getStringExtra("intentData")
 
+            if (!intentData.isNullOrEmpty()) {
                 if (dbHelper.itemExists(intentData)) {
                     // Get the current quantity and increment it
-                    val currentQuantity: Int = dbHelper.getItemQuantity(intentData)
+                    val currentQuantity = dbHelper.getItemQuantity(intentData)
                     dbHelper.updateQuantity(intentData, currentQuantity + 1)
                 } else {
                     // Insert new item with quantity 1
                     dbHelper.insertTransaction(intentData, 1)
                 }
 
-
-                scannedBarcodes!!.add(intentData)
+                scannedBarcodes.add(intentData)
                 updateResultText()
             }
         }
@@ -104,16 +86,13 @@ class MainActivity : AppCompatActivity() {
 
     // Update result text to show scanned barcodes
     private fun updateResultText() {
-        val sb = StringBuilder()
-        for (barcode in scannedBarcodes!!) {
-            sb.append(barcode).append("\n")
-        }
-        resultText!!.text = sb.toString()
+        resultText.text = scannedBarcodes.joinToString("\n")
     }
 
     // Display all data from the database
+// In MainActivity.kt
     private fun displayAllData() {
-        val cursor: Cursor = dbHelper.getAllTransactions()
+        val cursor: Cursor = dbHelper.allTransactions // No parentheses here
         if (cursor.count == 0) {
             Toast.makeText(this, "No data found", Toast.LENGTH_SHORT).show()
             return
@@ -125,6 +104,7 @@ class MainActivity : AppCompatActivity() {
             sb.append("Name: ").append(cursor.getString(1)).append(", ")
             sb.append("Quantity: ").append(cursor.getInt(2)).append("\n")
         }
-        resultText!!.text = sb.toString()
+        resultText.text = sb.toString()
     }
+
 }

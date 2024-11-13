@@ -168,14 +168,15 @@
         android:id="@+id/registerButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="40dp"
         android:background="@color/purple"
-        android:textStyle="bold"
         android:fontFamily="@font/montserrat_regular"
         android:text="Register"
         android:textColor="@android:color/white"
-        app:layout_constraintTop_toBottomOf="@id/passwordLayout"
-        tools:layout_editor_absoluteX="16dp" />
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
 
     <TextView
         android:id="@+id/loginLink"

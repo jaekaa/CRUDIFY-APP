@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.crudifyapplication.DatabaseHelper
 import com.google.android.material.textfield.TextInputEditText
 
 class CreateTableActivity : AppCompatActivity() {

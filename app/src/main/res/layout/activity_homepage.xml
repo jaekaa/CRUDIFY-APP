@@ -37,12 +37,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/crudifyText" />
 
-    <!-- Create New Button -->
-
-    <!-- Scan Barcode Button -->
-
-    <!-- Show Data Button -->
-
     <Button
         android:id="@+id/createNewBtn"
         android:layout_width="wrap_content"

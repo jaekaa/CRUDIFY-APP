@@ -66,7 +66,9 @@ class ProductListActivity : AppCompatActivity(), ProductListAdapter.OnProductAct
 
     override fun onDeleteClick(position: Int, productId: Int) {
         // Remove the product from the database and notify the adapter
-        val deleted = dbHelper.deleteTransaction(productId) // Now returns a Boolean
+        // In MainActivity.kt
+        val deleted: Boolean =
+            dbHelper.deleteTransaction(productId) // Ensure this line calls deleteTransaction correctly
         if (deleted) {
             loadDataIntoRecyclerView() // Refresh list
             Toast.makeText(this, "Product deleted", Toast.LENGTH_SHORT).show()
@@ -74,4 +76,4 @@ class ProductListActivity : AppCompatActivity(), ProductListAdapter.OnProductAct
             Toast.makeText(this, "Error deleting product", Toast.LENGTH_SHORT).show()
         }
     }
-}
+    }

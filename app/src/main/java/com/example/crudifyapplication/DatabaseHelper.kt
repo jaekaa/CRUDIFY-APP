@@ -92,8 +92,8 @@ class DatabaseHelper(context: Context?) :
         db.close()
     }
 
+    // In DatabaseHelper.kt
     val allTransactions: Cursor
-        // Get all transactions
         get() {
             val db = this.readableDatabase
             return db.query(
@@ -104,11 +104,12 @@ class DatabaseHelper(context: Context?) :
                 null,
                 null,
                 null
-            ) // Use the correct table name here
+            )
         }
 
 
-    // Delete a transaction by ID
+
+    // In DatabaseHelper.kt
     fun deleteTransaction(idToDelete: Int): Boolean {
         val db = this.writableDatabase
         val rowsDeleted = db.delete(TABLE_TRANSACTIONS, "$COLUMN_ID = ?", arrayOf(idToDelete.toString()))
