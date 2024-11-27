@@ -1,4 +1,4 @@
-package com.example.crudifyapplication
+package com.example.crudifyapplication.data
 
 import android.content.ContentValues
 import android.content.Context

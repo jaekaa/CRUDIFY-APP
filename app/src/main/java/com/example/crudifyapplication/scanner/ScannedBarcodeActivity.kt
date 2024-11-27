@@ -1,4 +1,4 @@
-package com.example.crudifyapplication
+package com.example.crudifyapplication.scanner
 
 import android.Manifest
 import android.content.Intent
@@ -10,6 +10,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.example.crudifyapplication.R
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode

@@ -1,4 +1,4 @@
-package com.example.crudifyapplication
+package com.example.crudifyapplication.auth
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,7 +10,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.crudifyapplication.R
 import com.google.android.material.textfield.TextInputEditText
+import com.example.crudifyapplication.HomepageActivity
 
 class ForgotpassActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

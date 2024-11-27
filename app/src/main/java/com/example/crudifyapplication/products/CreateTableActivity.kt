@@ -1,12 +1,12 @@
-package com.example.crudifyapplication
+package com.example.crudifyapplication.products
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.crudifyapplication.DatabaseHelper
+import com.example.crudifyapplication.R
+import com.example.crudifyapplication.data.DatabaseHelper
 import com.google.android.material.textfield.TextInputEditText
 
 class CreateTableActivity : AppCompatActivity() {

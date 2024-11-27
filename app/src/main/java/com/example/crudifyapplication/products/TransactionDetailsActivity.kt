@@ -1,4 +1,4 @@
-package com.example.crudifyapplication
+package com.example.crudifyapplication.products
 
 import android.content.Intent
 import android.database.Cursor
@@ -10,7 +10,9 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.crudifyapplication.ProductListActivity
+import com.example.crudifyapplication.R
+import com.example.crudifyapplication.data.DatabaseHelper
+import com.example.crudifyapplication.products.ProductListActivity
 
 class TransactionDetailsActivity : AppCompatActivity() {
     private var tableLayout: TableLayout? = null
@@ -87,4 +89,3 @@ class TransactionDetailsActivity : AppCompatActivity() {
         }
     }
 }
-

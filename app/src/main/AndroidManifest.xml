@@ -26,15 +26,15 @@
         </intent-filter>
     </activity>
 
-    <activity android:name=".ScannedBarcodeActivity" android:exported="false"/>
-    <activity android:name=".TransactionDetailsActivity" android:exported="false">
+    <activity android:name=".scanner.ScannedBarcodeActivity" android:exported="false"/>
+    <activity android:name=".products.TransactionDetailsActivity" android:exported="false">
         <meta-data android:name="android.app.lib_name" android:value=""/>
     </activity>
-    <activity android:name=".ProductListActivity" android:exported="false"/>
-    <activity android:name=".CreateTableActivity" android:exported="false"/>
-    <activity android:name=".RegisterActivity" android:exported="true"/>
-    <activity android:name=".SigninActivity" android:exported="true"/>
-    <activity android:name=".ForgotpassActivity" android:exported="true"/>
+    <activity android:name=".products.ProductListActivity" android:exported="false"/>
+    <activity android:name=".products.CreateTableActivity" android:exported="false"/>
+    <activity android:name=".auth.RegisterActivity" android:exported="true"/>
+    <activity android:name=".auth.SigninActivity" android:exported="true"/>
+    <activity android:name=".auth.ForgotpassActivity" android:exported="true"/>
     <activity android:name=".HomepageActivity" android:exported="true"/>
 
 </application>
