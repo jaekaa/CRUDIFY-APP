@@ -5,20 +5,31 @@
     android:padding="16dp"
     android:gravity="center">
 
+
+
     <TextView
-        android:id="@+id/result_text"
-        android:layout_width="match_parent"
-        android:layout_height="564dp"
-        android:background="#e0e0e0"
-        android:gravity="top"
-        android:minHeight="200dp"
-        android:padding="10dp"
-        android:scrollbarStyle="insideOverlay"
-        android:scrollbars="vertical"
-        android:textColor="#000000"
-        android:textIsSelectable="true"
-        android:textSize="16sp"
-        android:visibility="gone"/>
+        android:id="@+id/crudifyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="232dp"
+        android:fontFamily="@font/montserrat_bold"
+        android:shadowColor="#7F8487"
+        android:shadowDy="7"
+        android:shadowRadius="5"
+        android:text="CRUDIFY"
+        android:textColor="@android:color/black"
+        android:textSize="63sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/welcomeMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Welcome! Manage all your tasks and daily work here."
+        android:textAlignment="center"
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/btnScanBarcode"
@@ -30,6 +41,7 @@
         android:text="Scan Barcode"
         android:textSize="16sp" />
 
+    <!-- Show stored data button -->
     <Button
         android:id="@+id/btnShowData"
         android:layout_width="wrap_content"
@@ -44,7 +56,8 @@
         android:textSize="16sp"
         android:textStyle="bold" />
 
-    <include layout="@layout/transaction_details"
-        android:visibility="gone"/>
-
+    <!-- Included layout for transaction details -->
+    <include
+        layout="@layout/transaction_details"
+        android:visibility="gone" />
 </LinearLayout>

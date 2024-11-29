@@ -32,7 +32,6 @@
         android:text="Quantity"
         android:textSize="16sp" />
 
-    <!-- Edit Icon -->
     <ImageView
         android:id="@+id/editIcon"
         android:layout_width="24dp"

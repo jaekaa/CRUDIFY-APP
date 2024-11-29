@@ -36,6 +36,7 @@
     <activity android:name=".auth.SigninActivity" android:exported="true"/>
     <activity android:name=".auth.ForgotpassActivity" android:exported="true"/>
     <activity android:name=".HomepageActivity" android:exported="true"/>
+    <activity android:name=".products.EditProductActivity" android:exported="true"/>
 
 </application>
 

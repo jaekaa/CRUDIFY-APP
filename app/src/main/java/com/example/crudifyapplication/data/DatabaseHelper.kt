@@ -181,4 +181,28 @@ class DatabaseHelper(context: Context?) :
         private const val COLUMN_PRODUCT_NAME = "product_name"
         private const val COLUMN_PRODUCT_QUANTITY = "product_quantity"
     }
+
+    fun updateProduct(productId: Int, productName: String, productQuantity: Int): Boolean {
+        val db = this.writableDatabase
+        val contentValues = ContentValues().apply {
+            put(COLUMN_PRODUCT_NAME, productName)
+            put(COLUMN_PRODUCT_QUANTITY, productQuantity)
+        }
+
+        val rowsUpdated = db.update(
+            TABLE_PRODUCTS,
+            contentValues,
+            "$COLUMN_PRODUCT_ID = ?",
+            arrayOf(productId.toString())
+        )
+        db.close()
+        return rowsUpdated > 0 // Check how many rows are affected
+    }
+
+    fun getProductByBarcode(barcode: String): Cursor {
+        val db = this.readableDatabase
+        val query = "SELECT * FROM products WHERE barcode = ?"
+        return db.rawQuery(query, arrayOf(barcode))
+    }
+
 }
