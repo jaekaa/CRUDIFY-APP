@@ -3,6 +3,7 @@ package com.example.crudifyapplication.data
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import android.widget.Toast
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
@@ -56,6 +57,12 @@ class DatabaseHelper(context: Context?) :
         return result != -1L // Returns true if insert was successful
     }
 
+    fun getProductById(productId: Int): Cursor? {
+        val db = this.readableDatabase
+        val query = "SELECT * FROM $TABLE_PRODUCTS WHERE $COLUMN_PRODUCT_ID = ?"
+        return db.rawQuery(query, arrayOf(productId.toString()))
+    }
+
     // Check if a transaction item exists
     fun itemExists(name: String): Boolean {
         val db = this.readableDatabase
@@ -84,12 +91,22 @@ class DatabaseHelper(context: Context?) :
     }
 
     // Update quantity of an item in transaction_details
-    fun updateQuantity(name: String, newQuantity: Int) {
+    fun updateQuantity(productId: Int, productName: String, productQuantity: Int): Boolean {
         val db = this.writableDatabase
-        val contentValues = ContentValues()
-        contentValues.put(COLUMN_QUANTITY, newQuantity)
-        db.update(TABLE_TRANSACTIONS, contentValues, COLUMN_NAME + " = ?", arrayOf(name))
+        val contentValues = ContentValues().apply {
+            put(COLUMN_PRODUCT_NAME, productName)
+            put(COLUMN_PRODUCT_QUANTITY, productQuantity)
+        }
+
+        val rowsUpdated = db.update(
+            TABLE_PRODUCTS,
+            contentValues,
+            "$COLUMN_PRODUCT_ID = ?",
+            arrayOf(productId.toString()) // Make sure the productId is passed as parameter
+        )
+
         db.close()
+        return rowsUpdated > 0 // Check if the update was successful
     }
 
     // In DatabaseHelper.kt
@@ -167,6 +184,12 @@ class DatabaseHelper(context: Context?) :
         private const val DATABASE_NAME = "scanner.db"
         private const val DATABASE_VERSION = 1
 
+        // Products table
+        private const val TABLE_PRODUCTS = "products"
+        private const val COLUMN_PRODUCT_ID = "product_id"
+        private const val COLUMN_PRODUCT_NAME = "product_name"
+        private const val COLUMN_PRODUCT_QUANTITY = "product_quantity"
+
         // Transaction details table
         private const val TABLE_TRANSACTIONS = "transaction_details"
         private const val COLUMN_ID = "id"
@@ -174,12 +197,6 @@ class DatabaseHelper(context: Context?) :
         private const val COLUMN_CATEGORY = "category"
         private const val COLUMN_QUANTITY = "quantity"
         private const val COLUMN_SELL_BY_DATE = "sellByDate"
-
-        // Products table
-        private const val TABLE_PRODUCTS = "products"
-        private const val COLUMN_PRODUCT_ID = "product_id"
-        private const val COLUMN_PRODUCT_NAME = "product_name"
-        private const val COLUMN_PRODUCT_QUANTITY = "product_quantity"
     }
 
     fun updateProduct(productId: Int, productName: String, productQuantity: Int): Boolean {

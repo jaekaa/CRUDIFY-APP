@@ -80,7 +80,7 @@ class ScannedBarcodeActivity : AppCompatActivity() {
                     val resultIntent = Intent()
                     resultIntent.putExtra("intentData", intentData)
                     setResult(RESULT_OK, resultIntent)
-                    finish() // Close the activity and return to the ProductListActivity
+                    finish() // Close the activity and return to the HomepageActivity
                 }
             }
         })
@@ -109,8 +109,9 @@ class ScannedBarcodeActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 initialiseDetectorsAndSources()
             } else {
-                Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Permission Denied! Cannot scan barcodes.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 }
+

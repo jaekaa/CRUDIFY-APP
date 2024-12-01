@@ -23,9 +23,9 @@ class EditProductActivity : AppCompatActivity() {
         setContentView(R.layout.edit_product) // Your edit product layout
 
         // Retrieve data from Intent
-        productId = intent.getIntExtra("productId", 0)
-        productName = intent.getStringExtra("productName")
-        productQuantity = intent.getIntExtra("productQuantity", 0)
+        val productId = intent.getIntExtra("productId", 0)
+        val productName = intent.getStringExtra("productName")
+        val productQuantity = intent.getIntExtra("productQuantity", 0)
 
         // Initialize UI components
         editProductName = findViewById(R.id.editProductName)
@@ -60,7 +60,7 @@ class EditProductActivity : AppCompatActivity() {
             // Show success or failure message and finish the activity
             if (success) {
                 Toast.makeText(this, "Product updated successfully: $updatedName, Quantity: $updatedQuantity", Toast.LENGTH_SHORT).show()
-                finish()
+                finish() // Close the activity
             } else {
                 Toast.makeText(this, "Error updating product", Toast.LENGTH_SHORT).show()
             }

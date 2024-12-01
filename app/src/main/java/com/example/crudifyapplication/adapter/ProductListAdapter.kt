@@ -27,17 +27,31 @@ class ProductListAdapter(
     }
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
+        // Move the cursor to the correct position
         if (cursor.moveToPosition(position)) {
+            // Retrieve the product details from the cursor
             val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
             val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
             val quantity = cursor.getInt(cursor.getColumnIndexOrThrow("quantity"))
 
+            // Set the UI elements in the ViewHolder
             holder.productIdTextView.text = id.toString()
             holder.productNameTextView.text = name
             holder.productQuantityTextView.text = quantity.toString()
 
-            holder.editIcon.setOnClickListener { listener.onEditClick(position, id) }
-            holder.deleteIcon.setOnClickListener { listener.onDeleteClick(position, id) }
+            // Set up the edit and delete click listeners
+            holder.editIcon.setOnClickListener {
+                listener.onEditClick(position, id)
+            }
+
+            holder.deleteIcon.setOnClickListener {
+                listener.onDeleteClick(position, id)
+            }
+        } else {
+            // Handle case where cursor can't move to position
+            holder.productIdTextView.text = "N/A"
+            holder.productNameTextView.text = "Unknown"
+            holder.productQuantityTextView.text = "0"
         }
     }
 

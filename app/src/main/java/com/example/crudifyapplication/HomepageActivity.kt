@@ -1,6 +1,5 @@
 package com.example.crudifyapplication
 
-import com.example.crudifyapplication.products.EditProductActivity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -8,10 +7,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.crudifyapplication.products.CreateTableActivity
+import com.example.crudifyapplication.products.EditProductActivity
+import com.example.crudifyapplication.scanner.ScannedBarcodeActivity
 
 class HomepageActivity : AppCompatActivity() {
 
@@ -21,6 +24,10 @@ class HomepageActivity : AppCompatActivity() {
     private lateinit var productRecyclerView: RecyclerView
     private lateinit var productAdapter: ProductAdapter
     private val productList: MutableList<Product> = mutableListOf() // Empty product list
+    private lateinit var scannerIcon: ImageView // Declare scannerIcon variable
+
+    // Declare the ActivityResultLauncher
+    private lateinit var barcodeResultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +38,7 @@ class HomepageActivity : AppCompatActivity() {
         textView = findViewById(R.id.textView)
         createNewButton = findViewById(R.id.createNewButton)
         productRecyclerView = findViewById(R.id.productRecyclerView)
+        scannerIcon = findViewById(R.id.scannerIcon) // Initialize scannerIcon here
 
         // Set up RecyclerView with an empty list
         productRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -46,6 +54,22 @@ class HomepageActivity : AppCompatActivity() {
             // Navigate to CreateTableActivity
             val intent = Intent(this, CreateTableActivity::class.java)
             startActivity(intent)
+        }
+
+        // Initialize the ActivityResultLauncher
+        barcodeResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val barcodeData = result.data?.getStringExtra("intentData")
+                // Handle the barcode data (e.g., display it or use it)
+                val scannedBarcodeTextView: TextView = findViewById(R.id.scannedBarcodeTextView)
+                scannedBarcodeTextView.text = "Scanned Barcode: $barcodeData"
+            }
+        }
+
+        // Set scanner icon click listener
+        scannerIcon.setOnClickListener {
+            val intent = Intent(this, ScannedBarcodeActivity::class.java)
+            barcodeResultLauncher.launch(intent) // Use the launcher to start the activity
         }
     }
 
