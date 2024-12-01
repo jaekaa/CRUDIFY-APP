@@ -1,7 +1,7 @@
 package com.example.crudifyapplication.products
 
 import android.os.Bundle
-import android.view.View
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -10,60 +10,70 @@ import com.example.crudifyapplication.R
 import com.example.crudifyapplication.data.DatabaseHelper
 
 class EditProductActivity : AppCompatActivity() {
-
     private lateinit var editProductName: EditText
     private lateinit var editProductQuantity: EditText
     private lateinit var saveButton: Button
-    private var productId: Int = 0
-    private var productName: String? = null
-    private var productQuantity: Int = 0
+    private lateinit var dbHelper: DatabaseHelper
+    private var productId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.edit_product) // Your edit product layout
+        setContentView(R.layout.edit_product)
 
-        // Retrieve data from Intent
-        val productId = intent.getIntExtra("productId", 0)
-        val productName = intent.getStringExtra("productName")
-        val productQuantity = intent.getIntExtra("productQuantity", 0)
+        dbHelper = DatabaseHelper(this)
 
-        // Initialize UI components
+        // Get the product ID from the intent
+        productId = intent.getIntExtra("PRODUCT_ID", -1)
+        Log.d("EditProductActivity", "Product ID received: $productId")
+
+        // Initialize views
         editProductName = findViewById(R.id.editProductName)
         editProductQuantity = findViewById(R.id.editProductQuantity)
         saveButton = findViewById(R.id.saveButton)
 
-        // Set the existing product data
-        editProductName.setText(productName)
-        editProductQuantity.setText(productQuantity.toString())
+        // Load existing product details
+        loadProductDetails()
 
-        // Handle save button click
+        // Handle Save button click
         saveButton.setOnClickListener {
-            val updatedName = editProductName.text.toString()
-            val updatedQuantityString = editProductQuantity.text.toString()
+            val productName = editProductName.text.toString()
+            val productQuantity = editProductQuantity.text.toString().toIntOrNull()
 
-            // Check for empty fields
-            if (updatedName.isEmpty() || updatedQuantityString.isEmpty()) {
-                Toast.makeText(this, "Please fill in both fields", Toast.LENGTH_SHORT).show()
+            if (productName.isEmpty() || productQuantity == null) {
+                Toast.makeText(this, "Please enter valid details", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val updatedQuantity = updatedQuantityString.toIntOrNull() ?: 0
-            if (updatedQuantity == 0) {
-                Toast.makeText(this, "Quantity must be a positive number", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Update the product in the database (using DatabaseHelper)
-            val dbHelper = DatabaseHelper(this)
-            val success = dbHelper.updateProduct(productId, updatedName, updatedQuantity)
-
-            // Show success or failure message and finish the activity
-            if (success) {
-                Toast.makeText(this, "Product updated successfully: $updatedName, Quantity: $updatedQuantity", Toast.LENGTH_SHORT).show()
-                finish() // Close the activity
+            // Update product in database
+            val isUpdated = dbHelper.updateProduct(productId, productName, productQuantity)
+            if (isUpdated) {
+                Toast.makeText(this, "Product updated successfully", Toast.LENGTH_SHORT).show()
+                finish() // Close activity and return to the product list
             } else {
-                Toast.makeText(this, "Error updating product", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Error updating product. Please check product ID and try again.", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun loadProductDetails() {
+        // Get product from the database by its ID
+        val cursor = dbHelper.getProductById(productId)
+
+        if (cursor?.moveToFirst() == true) {
+            val productName = cursor.getString(cursor.getColumnIndexOrThrow("product_name"))
+            val productQuantity = cursor.getInt(cursor.getColumnIndexOrThrow("product_quantity"))
+            editProductName.setText(productName)
+            editProductQuantity.setText(productQuantity.toString())
+            Log.d("EditProductActivity", "Loaded product: $productName, Quantity: $productQuantity")
+        } else {
+            Log.e("EditProductActivity", "No product found for ID: $productId")
+        }
+
+        cursor?.close()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Release any resources if needed
     }
 }

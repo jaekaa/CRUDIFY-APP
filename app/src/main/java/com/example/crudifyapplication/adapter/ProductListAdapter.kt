@@ -27,44 +27,34 @@ class ProductListAdapter(
     }
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        // Move the cursor to the correct position
         if (cursor.moveToPosition(position)) {
-            // Retrieve the product details from the cursor
-            val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
-            val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
-            val quantity = cursor.getInt(cursor.getColumnIndexOrThrow("quantity"))
+            val productId = cursor.getInt(cursor.getColumnIndexOrThrow("product_id"))
+            val productName = cursor.getString(cursor.getColumnIndexOrThrow("product_name"))
+            val productQuantity = cursor.getInt(cursor.getColumnIndexOrThrow("product_quantity"))
 
-            // Set the UI elements in the ViewHolder
-            holder.productIdTextView.text = id.toString()
-            holder.productNameTextView.text = name
-            holder.productQuantityTextView.text = quantity.toString()
+            holder.productIdTextView.text = productId.toString()
+            holder.productNameTextView.text = productName
+            holder.productQuantityTextView.text = productQuantity.toString()
 
-            // Set up the edit and delete click listeners
             holder.editIcon.setOnClickListener {
-                listener.onEditClick(position, id)
+                listener.onEditClick(position, productId)
             }
 
             holder.deleteIcon.setOnClickListener {
-                listener.onDeleteClick(position, id)
+                listener.onDeleteClick(position, productId)
             }
-        } else {
-            // Handle case where cursor can't move to position
-            holder.productIdTextView.text = "N/A"
-            holder.productNameTextView.text = "Unknown"
-            holder.productQuantityTextView.text = "0"
         }
     }
 
     override fun getItemCount(): Int = cursor.count
 
-    fun swapCursor(newCursor: Cursor): Cursor {
+    fun swapCursor(newCursor: Cursor?) {
         if (cursor != newCursor) {
             val oldCursor = cursor
-            cursor = newCursor
+            cursor = newCursor ?: cursor
             notifyDataSetChanged()
-            return oldCursor
+            oldCursor?.close()
         }
-        return cursor
     }
 
     class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

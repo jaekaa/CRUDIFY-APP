@@ -1,8 +1,8 @@
 package com.example.crudifyapplication.products
 
 import android.content.Intent
+import android.database.Cursor
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -14,15 +14,17 @@ import com.example.crudifyapplication.R
 import com.example.crudifyapplication.adapter.ProductListAdapter
 import com.example.crudifyapplication.data.DatabaseHelper
 import com.example.crudifyapplication.scanner.ScannedBarcodeActivity
+import kotlinx.coroutines.*
 
 class ProductListActivity : AppCompatActivity() {
-    private var productButton: Button? = null
-    private var productRecyclerView: RecyclerView? = null
-    private var adapter: ProductListAdapter? = null
-    private var dbHelper: DatabaseHelper? = null
-    private var scannedBarcodeTextView: TextView? = null // To display the scanned barcode
+    private lateinit var productButton: Button
+    private lateinit var productRecyclerView: RecyclerView
+    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var adapter: ProductListAdapter
+    private lateinit var scannedBarcodeTextView: TextView
 
-    private val REQUEST_BARCODE_SCAN = 1001 // Define the request code for barcode scan
+    private val REQUEST_BARCODE_SCAN = 1001
+    private var activityScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,60 +32,109 @@ class ProductListActivity : AppCompatActivity() {
 
         dbHelper = DatabaseHelper(this)
 
-        // Initialize views
+        // Initialize UI components
         productButton = findViewById(R.id.createNewButton)
         productRecyclerView = findViewById(R.id.productRecyclerView)
-        scannedBarcodeTextView = findViewById(R.id.scannedBarcodeTextView) // Correct TextView for barcode
+        scannedBarcodeTextView = findViewById(R.id.scannedBarcodeTextView)
 
-        // Set up RecyclerView with a LinearLayoutManager
-        productRecyclerView?.layoutManager = LinearLayoutManager(this)
+        // Setup RecyclerView
+        productRecyclerView.layoutManager = LinearLayoutManager(this)
 
         // Load data into RecyclerView
         loadDataIntoRecyclerView()
 
-        // Set up button to navigate to CreateTableActivity
-        productButton?.setOnClickListener {
-            val intent = Intent(this@ProductListActivity, CreateTableActivity::class.java)
+        // Handle "Create New Product" button click
+        productButton.setOnClickListener {
+            val intent = Intent(this, CreateTableActivity::class.java)
             startActivity(intent)
         }
 
-        // Set up button to navigate to ScannedBarcodeActivity
-        val scanBarcodeButton = findViewById<ImageView>(R.id.scannerIcon)
+        // Handle barcode scanner button click
+        val scanBarcodeButton: ImageView = findViewById(R.id.scannerIcon)
         scanBarcodeButton.setOnClickListener {
-            val intent = Intent(this@ProductListActivity, ScannedBarcodeActivity::class.java)
+            val intent = Intent(this, ScannedBarcodeActivity::class.java)
             startActivityForResult(intent, REQUEST_BARCODE_SCAN)
         }
     }
 
-    // Method to load data into RecyclerView
+    // Load data into RecyclerView
     private fun loadDataIntoRecyclerView() {
-        val cursor = dbHelper?.allTransactions
-        if (cursor != null) {
-            adapter = ProductListAdapter(this, cursor, object : ProductListAdapter.OnProductActionListener {
-                override fun onEditClick(position: Int, productId: Int) {
-                    // Handle edit
-                    Toast.makeText(this@ProductListActivity, "Edit Product ID: $productId", Toast.LENGTH_SHORT).show()
-                }
+        activityScope.launch(Dispatchers.IO) {
+            val cursor: Cursor? = dbHelper.allProducts
+            withContext(Dispatchers.Main) {
+                if (!isFinishing) {  // Make sure the activity is still valid
+                    cursor?.let {
+                        adapter = ProductListAdapter(this@ProductListActivity, it, object : ProductListAdapter.OnProductActionListener {
+                            override fun onEditClick(position: Int, productId: Int) {
+                                // Navigate to EditProductActivity
+                                val intent = Intent(this@ProductListActivity, EditProductActivity::class.java)
+                                intent.putExtra("PRODUCT_ID", productId)
+                                startActivity(intent)
+                            }
 
-                override fun onDeleteClick(position: Int, productId: Int) {
-                    // Handle delete
-                    dbHelper?.deleteTransaction(productId)
-                    loadDataIntoRecyclerView() // Refresh the list
-                    Toast.makeText(this@ProductListActivity, "Product deleted", Toast.LENGTH_SHORT).show()
+                            override fun onDeleteClick(position: Int, productId: Int) {
+                                // Delete product and refresh list
+                                val isDeleted = dbHelper.deleteProduct(productId)
+                                if (isDeleted) {
+                                    loadDataIntoRecyclerView()  // Refresh the RecyclerView
+                                    Toast.makeText(this@ProductListActivity, "Product deleted", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(this@ProductListActivity, "Failed to delete product", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        })
+                        productRecyclerView.adapter = adapter
+                    }
                 }
-            })
-            productRecyclerView?.adapter = adapter
+            }
         }
     }
 
-    // Override onActivityResult to get the scanned barcode data
+    override fun onResume() {
+        super.onResume()
+        // Refresh the RecyclerView when returning to this activity
+        loadDataIntoRecyclerView()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Cancel all ongoing coroutines to prevent leaks
+        activityScope.cancel()
+
+        // Release database resources
+        dbHelper.close()
+
+        // Release RecyclerView cursor if needed
+        if (::adapter.isInitialized) {
+            adapter.swapCursor(null)
+        }
+    }
+
+    // Handle scanned barcode result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_BARCODE_SCAN && resultCode == RESULT_OK) {
             val barcode = data?.getStringExtra("intentData")
-            if (!barcode.isNullOrEmpty()) {
-                scannedBarcodeTextView?.text = "Scanned Barcode: $barcode"
-                // Optionally, add the barcode to your product database
+
+            // Display the scanned barcode
+            scannedBarcodeTextView.text = "Scanned Barcode: $barcode"
+
+            // Optionally, save the barcode to the database or use it for further operations
+            // Assuming you have a method to add the scanned barcode to the database
+            activityScope.launch(Dispatchers.IO) {
+                // Insert or update the product in the database based on the barcode
+                val success = barcode?.let { dbHelper.insertOrUpdateProduct(it, 1) } // Assume quantity = 1 for simplicity
+
+                withContext(Dispatchers.Main) {
+                    // Check the result and show a Toast if necessary
+                    if (success == true) {
+                        // Reload the data in the RecyclerView
+                        loadDataIntoRecyclerView()
+                        Toast.makeText(this@ProductListActivity, "Product added/updated successfully", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@ProductListActivity, "Failed to add/update product", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
     }

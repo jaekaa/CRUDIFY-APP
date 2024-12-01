@@ -3,12 +3,13 @@ package com.example.crudifyapplication.data
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-import android.widget.Toast
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 
 class DatabaseHelper(context: Context?) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+
     override fun onCreate(db: SQLiteDatabase) {
         // Create transaction_details table
         val createTransactionTable = "CREATE TABLE " + TABLE_TRANSACTIONS + " (" +
@@ -34,16 +35,17 @@ class DatabaseHelper(context: Context?) :
     }
 
     // Insert a new transaction into transaction_details table
-    fun insertTransaction(name: String?, quantity: Int): Boolean {
+    fun insertTransaction(productName: String, productQuantity: Int): Boolean {
         val db = this.writableDatabase
-        val contentValues = ContentValues()
-        contentValues.put(COLUMN_NAME, name)
-        contentValues.put(COLUMN_QUANTITY, quantity)
+        val contentValues = ContentValues().apply {
+            put(COLUMN_PRODUCT_NAME, productName)
+            put(COLUMN_PRODUCT_QUANTITY, productQuantity)
+        }
 
-        val result = db.insert(TABLE_TRANSACTIONS, null, contentValues)
-        db.close()
-        return result != -1L // Returns true if insert was successful
+        val result = db.insert(TABLE_PRODUCTS, null, contentValues)
+        return result != -1L
     }
+
 
     // Insert a new product into products table
     fun insertProduct(productName: String?, productQuantity: Int): Boolean {
@@ -53,10 +55,10 @@ class DatabaseHelper(context: Context?) :
         contentValues.put(COLUMN_PRODUCT_QUANTITY, productQuantity)
 
         val result = db.insert(TABLE_PRODUCTS, null, contentValues)
-        db.close()
-        return result != -1L // Returns true if insert was successful
+        return result != -1L
     }
 
+    // Get a product by its ID
     fun getProductById(productId: Int): Cursor? {
         val db = this.readableDatabase
         val query = "SELECT * FROM $TABLE_PRODUCTS WHERE $COLUMN_PRODUCT_ID = ?"
@@ -102,14 +104,12 @@ class DatabaseHelper(context: Context?) :
             TABLE_PRODUCTS,
             contentValues,
             "$COLUMN_PRODUCT_ID = ?",
-            arrayOf(productId.toString()) // Make sure the productId is passed as parameter
+            arrayOf(productId.toString())
         )
-
-        db.close()
-        return rowsUpdated > 0 // Check if the update was successful
+        return rowsUpdated > 0
     }
 
-    // In DatabaseHelper.kt
+    // Get all transactions
     val allTransactions: Cursor
         get() {
             val db = this.readableDatabase
@@ -124,60 +124,73 @@ class DatabaseHelper(context: Context?) :
             )
         }
 
-
-
-    // In DatabaseHelper.kt
+    // Delete a transaction
     fun deleteTransaction(idToDelete: Int): Boolean {
         val db = this.writableDatabase
         val rowsDeleted = db.delete(TABLE_TRANSACTIONS, "$COLUMN_ID = ?", arrayOf(idToDelete.toString()))
-        db.close()
-        return rowsDeleted > 0 // Return true if at least one row was deleted, else false
+        return rowsDeleted > 0
+    }
+
+    // Get all products
+    val allProducts: Cursor
+        get() {
+            val db = this.readableDatabase
+            return db.rawQuery("SELECT * FROM $TABLE_PRODUCTS", null)
+        }
+
+    // Insert or update a product
+    fun insertOrUpdateProduct(productName: String, productQuantity: Int): Boolean {
+        val db = this.writableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_PRODUCTS WHERE $COLUMN_PRODUCT_NAME = ?", arrayOf(productName))
+
+        if (cursor.moveToFirst()) {
+            val currentQuantity = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PRODUCT_QUANTITY))
+            val contentValues = ContentValues().apply {
+                put(COLUMN_PRODUCT_QUANTITY, currentQuantity + productQuantity)
+            }
+            val rowsUpdated = db.update(TABLE_PRODUCTS, contentValues, "$COLUMN_PRODUCT_NAME = ?", arrayOf(productName))
+            cursor.close()
+            return rowsUpdated > 0
+        } else {
+            val contentValues = ContentValues().apply {
+                put(COLUMN_PRODUCT_NAME, productName)
+                put(COLUMN_PRODUCT_QUANTITY, productQuantity)
+            }
+            val result = db.insert(TABLE_PRODUCTS, null, contentValues)
+            cursor.close()
+            return result != -1L
+        }
     }
 
 
-    val allProducts: Cursor
-        // Get all products
-        get() {
-            val db = this.readableDatabase
-            return db.rawQuery("SELECT * FROM " + TABLE_PRODUCTS, null)
-        }
 
-    fun insertOrUpdateProduct(productName: String, productQuantity: Int): Boolean {
+    // Update a product
+    fun updateProduct(productId: Int, productName: String, productQuantity: Int): Boolean {
         val db = this.writableDatabase
-
-        // Check if product already exists
-        val cursor = db.rawQuery(
-            "SELECT * FROM " + TABLE_PRODUCTS + " WHERE " + COLUMN_PRODUCT_NAME + " = ?",
-            arrayOf(productName)
-        )
-        if (cursor.moveToFirst()) {
-            // Product exists, update quantity
-            val currentQuantity = cursor.getInt(
-                cursor.getColumnIndexOrThrow(
-                    COLUMN_PRODUCT_QUANTITY
-                )
-            )
-            val contentValues = ContentValues()
-            contentValues.put(COLUMN_PRODUCT_QUANTITY, currentQuantity + productQuantity)
-            db.update(
-                TABLE_PRODUCTS,
-                contentValues,
-                COLUMN_PRODUCT_NAME + " = ?",
-                arrayOf(productName)
-            )
-            cursor.close()
-            db.close()
-            return true
-        } else {
-            // Product does not exist, insert new entry
-            val contentValues = ContentValues()
-            contentValues.put(COLUMN_PRODUCT_NAME, productName)
-            contentValues.put(COLUMN_PRODUCT_QUANTITY, productQuantity)
-            val result = db.insert(TABLE_PRODUCTS, null, contentValues)
-            cursor.close()
-            db.close()
-            return result != -1L
+        val contentValues = ContentValues().apply {
+            put(COLUMN_PRODUCT_NAME, productName)
+            put(COLUMN_PRODUCT_QUANTITY, productQuantity)
         }
+
+        val rowsUpdated = db.update(
+            TABLE_PRODUCTS,
+            contentValues,
+            "$COLUMN_PRODUCT_ID = ?",
+            arrayOf(productId.toString())
+        )
+        return rowsUpdated > 0
+    }
+
+    // Delete a product by its ID
+    fun deleteProduct(productId: Int): Boolean {
+        val db = this.writableDatabase
+        val rowsDeleted = db.delete(TABLE_PRODUCTS, "$COLUMN_PRODUCT_ID = ?", arrayOf(productId.toString()))
+        return rowsDeleted > 0 // Return true if at least one row was deleted
+    }
+
+    // Close the database
+    fun closeDatabase() {
+        this.writableDatabase.close()
     }
 
     companion object {
@@ -198,28 +211,4 @@ class DatabaseHelper(context: Context?) :
         private const val COLUMN_QUANTITY = "quantity"
         private const val COLUMN_SELL_BY_DATE = "sellByDate"
     }
-
-    fun updateProduct(productId: Int, productName: String, productQuantity: Int): Boolean {
-        val db = this.writableDatabase
-        val contentValues = ContentValues().apply {
-            put(COLUMN_PRODUCT_NAME, productName)
-            put(COLUMN_PRODUCT_QUANTITY, productQuantity)
-        }
-
-        val rowsUpdated = db.update(
-            TABLE_PRODUCTS,
-            contentValues,
-            "$COLUMN_PRODUCT_ID = ?",
-            arrayOf(productId.toString())
-        )
-        db.close()
-        return rowsUpdated > 0 // Check how many rows are affected
-    }
-
-    fun getProductByBarcode(barcode: String): Cursor {
-        val db = this.readableDatabase
-        val query = "SELECT * FROM products WHERE barcode = ?"
-        return db.rawQuery(query, arrayOf(barcode))
-    }
-
 }
