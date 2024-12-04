@@ -43,3 +43,10 @@ Apple	          10
 Orange	         5
 Banana	         8
 Mango	           3
+
+![Code-128 (2)](https://github.com/user-attachments/assets/1ed2ba1f-64a6-4ffc-aaf2-e986f28f1ea7)
+![Code-128](https://github.com/user-attachments/assets/5284751f-b975-41a9-85ad-6561fc2aff58)
+![Code-128 (1)](https://github.com/user-attachments/assets/1e7bcc6c-d987-45bb-ad93-2dc07e8d9036)
+
+
+
